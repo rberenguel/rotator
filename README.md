@@ -1,6 +1,6 @@
-A shape rotating game. Play it [here](https://0xf00ff00f.github.io/rotator/).
+A shape rotating game forked from https://github.com/0xf00ff00f
 
-If you like this you should get the [Android version](https://play.google.com/store/apps/details?id=xyz.sagui.rotator), it looks a lot nicer!
+
 
 ## Building
 
