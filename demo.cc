@@ -448,7 +448,7 @@ void Demo::renderScore() const
             return 0.0f;
         return std::min(1.0f, (m_stateTime - StartTime) / FadeInTime);
     }();
-    const auto color = glm::vec4(0, 0, 0, alpha);
+    const auto color = glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, 1.0);
 
     m_uiPainter->setFont(FontBig);
 
