@@ -39,13 +39,24 @@ PUBLIC
 )
 
 if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    # For native macOS build using sdl12-compat from Homebrew
+    # Add Homebrew's include directory
+    target_include_directories(game PUBLIC /opt/homebrew/include)
+    
+    # Add Homebrew's library directory for linking
+    target_link_options(game PUBLIC "-L/opt/homebrew/lib") # For linker search path
+                                                         # Alternatively, link_directories(/opt/homebrew/lib) before add_executable
+
     target_link_libraries(game
-    PUBLIC
+        PUBLIC
         GLEW::GLEW
         OpenGL::GL
-        SDL::SDL
+        SDLmain # Link against libSDLmain.a or libSDLmain.dylib
+        SDL     # Link against libSDL.a or libSDL.dylib
+        "-framework Cocoa" # Link against the Cocoa framework
     )
 endif()
+
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")

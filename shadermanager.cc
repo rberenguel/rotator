@@ -77,6 +77,7 @@ void ShaderManager::useProgram(Program id)
     m_currentProgram = cachedProgram.get();
 }
 
+
 int ShaderManager::uniformLocation(Uniform id)
 {
     if (!m_currentProgram || !m_currentProgram->program)
@@ -87,8 +88,8 @@ int ShaderManager::uniformLocation(Uniform id)
     if (location == -1)
     {
         static constexpr const char *uniformNames[] = {
-            // clang-format off
-            "mvp",
+            // clang-format off 
+            "mvp", 
             "baseColorTexture",
             "mixColor",
             // clang-format on

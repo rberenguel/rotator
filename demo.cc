@@ -26,7 +26,7 @@ constexpr const auto ShapeSegments = 4;
 constexpr const auto Columns = 3;
 constexpr const auto TopMargin = 40;
 
-constexpr const auto BackgroundColor = glm::vec3(0.75);
+constexpr const auto BackgroundColor = glm::vec3(0.0f/255.0f, 21.0f/255.0f, 27.0f/255.0f); // Half of dark solarized base
 
 constexpr const auto TotalPlayTime = 120.0f;
 
@@ -60,7 +60,7 @@ constexpr const std::array<glm::imat4x4, 24> Rotations = {
     glm::imat4x4{{1, 0, 0, 0}, {0, -1, 0, 0}, {0, 0, -1, 0}, {0, 0, 0, 1}},
     glm::imat4x4{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
 
-constexpr const char *FontName = "OpenSans_Regular.ttf";
+constexpr const char *FontName = "monoid-regular.ttf";
 
 Blocks rotated(const Blocks &shape, const glm::imat4x4 &rotation)
 {
@@ -301,11 +301,11 @@ void Demo::renderShapes() const
                 switch (m_state)
                 {
                 case State::Fail:
-                    return glm::vec3(1, 0, 0);
+                    return glm::vec3(220.0f/255.0f, 50.0f/255.0f, 47.0f/255.0f);
                 case State::Success:
-                    return glm::vec3(0, 1, 0);
+                    return glm::vec3(133.0f/255.0f, 153.0f/255.0f, 0.0f/255.0f);
                 default:
-                    return glm::vec3(1, 1, 0);
+                    return glm::vec3(181.0f/255.0f, 137.0f/255.0f, 0.0f/255.0f);
                 }
             }();
             if (m_state == State::Result)
@@ -334,7 +334,8 @@ void Demo::renderShapes() const
             }
             return 0.0f;
         }();
-        m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(BackgroundColor, bgAlpha));
+        //m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(BackgroundColor, bgAlpha));
+        m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(glm::vec3(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f), .5));
         glEnable(GL_DEPTH_TEST);
         shape->mesh->render(GL_TRIANGLES);
     }
@@ -405,20 +406,20 @@ void Demo::renderTimer() const
     }();
 
     m_uiPainter->setFont(FontBig);
-    const auto bigAdvance = m_uiPainter->horizontalAdvance(bigText);
+    const auto bigAdvance = m_uiPainter->horizontalAdvance(smallText);
 
     m_uiPainter->setFont(FontSmall);
     const auto smallAdvance = m_uiPainter->horizontalAdvance(smallText);
 
-    const auto totalAdvance = bigAdvance + smallAdvance;
+    const auto totalAdvance = bigAdvance; // + smallAdvance;
 
     const auto textPos = glm::vec2(-0.5 * totalAdvance, -0.5 * m_canvasHeight + 50);
 
-    m_uiPainter->setFont(FontBig);
-    m_uiPainter->drawText(textPos, glm::vec4(0, 0, 0, alpha), 0, bigText);
-
     m_uiPainter->setFont(FontSmall);
-    m_uiPainter->drawText(textPos + glm::vec2(bigAdvance, 0), glm::vec4(0, 0, 0, alpha), 0, smallText);
+    m_uiPainter->drawText(textPos, glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, alpha), 0, bigText);
+
+    //m_uiPainter->setFont(FontSmall);
+    //m_uiPainter->drawText(textPos + glm::vec2(bigAdvance, 0), glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, alpha), 0, smallText);
 }
 
 void Demo::renderIntro() const
@@ -426,7 +427,7 @@ void Demo::renderIntro() const
     static const UIPainter::Font FontBig{FontName, 60};
     static const UIPainter::Font FontSmall{FontName, 40};
 
-    const auto color = glm::vec4(0, 0, 0, 1);
+    const auto color = glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, 1.0);
 
     m_uiPainter->setFont(FontBig);
     drawCenteredText(glm::vec2(0, -40), color, "SELECT THE MATCHING PAIR"s);
@@ -484,8 +485,11 @@ void Demo::drawCenteredText(const glm::vec2 &pos, const glm::vec4 &color, const 
 
 void Demo::update(float elapsed)
 {
-    for (auto &shape : m_shapes)
-        shape->wobble.update(elapsed);
+    if(m_state != State::Success){
+        for (auto &shape : m_shapes){
+            shape->wobble.update(elapsed);
+        }
+    }
     m_stateTime += elapsed;
     switch (m_state)
     {

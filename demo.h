@@ -25,7 +25,7 @@ struct Shape
     glm::imat4x4 baseRotation;
     glm::quat rotation;
     bool selected = false;
-    Wobble wobble = Wobble{0.125f};
+    Wobble wobble = Wobble{0.5f};
 };
 
 enum class Key
