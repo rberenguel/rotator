@@ -27,7 +27,7 @@ private:
         }
         glm::mat4 eval(float t) const
         {
-            const auto angle = amplitude * sinf(speed * t + phase);
+            const auto angle = amplitude * sinf(0.5*speed * t + phase);
             return glm::rotate(glm::mat4(1.0f), angle, dir);
         }
         float amplitude;
