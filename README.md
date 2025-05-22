@@ -46,4 +46,5 @@ $ emcmake cmake -B build -S .
 $ cmake --build build --parallel
 ```
 
-This should generate the `game.{html,wasm,js}` files.
+This should generate the `game.{
+    html, wasm, js}` files.

@@ -77,7 +77,6 @@ void ShaderManager::useProgram(Program id)
     m_currentProgram = cachedProgram.get();
 }
 
-
 int ShaderManager::uniformLocation(Uniform id)
 {
     if (!m_currentProgram || !m_currentProgram->program)
@@ -88,10 +87,8 @@ int ShaderManager::uniformLocation(Uniform id)
     if (location == -1)
     {
         static constexpr const char *uniformNames[] = {
-            // clang-format off 
-            "mvp", 
-            "baseColorTexture",
-            "mixColor",
+            // clang-format off
+            "mvp", "baseColorTexture", "mixColor",
             // clang-format on
         };
         static_assert(std::extent_v<decltype(uniformNames)> == NumUniforms, "expected number of uniforms to match");

@@ -21,14 +21,17 @@ using namespace std::string_literals;
 namespace
 {
 constexpr const auto ShapeCount = 6;
+
+// TODO: dynamically increase shape segments and reduce scale in scale matrix if that changes
+
 constexpr const auto ShapeSegments = 4;
 
 constexpr const auto Columns = 2;
 constexpr const auto TopMargin = 40;
 
-constexpr const auto BackgroundColor = glm::vec3(21.0f/255.0f, 21.0f/255.0f, 21.0f/255.0f);
-
-//glm::vec3(0.0f/255.0f, 21.0f/255.0f, 27.0f/255.0f); // Half of dark solarized base
+constexpr const auto BackgroundColor = glm::vec3(21.0f / 255.0f, 21.0f / 255.0f, 21.0f / 255.0f);
+constexpr const auto Orange = glm::vec4(200.0f / 255.0f, 100.0f / 255.0f, 0.0f / 255.0f, 1.0);
+constexpr const auto Yellow = glm::vec4(250.0f / 255.0f, 250.0f / 255.0f, 0.0f / 255.0f, 1.0);
 
 constexpr const auto TotalPlayTime = 120.0f;
 
@@ -153,34 +156,35 @@ std::unique_ptr<Shape> initializeShape(const Blocks &blocks, const glm::imat4x4 
         std::vector<Vertex> vertices;
         for (const auto &center : blocks)
         {
-            auto addFace = [&vertices, blockScale, center = glm::vec3(center)](
-                               const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3) {
+            const auto p = 1.0f;
+            auto addFace = [&vertices, blockScale, center = glm::vec3(center),
+                            p](const glm::vec3 &p0, const glm::vec3 &p1, const glm::vec3 &p2, const glm::vec3 &p3) {
                 vertices.push_back({p0 * blockScale + center, {0, 0}});
-                vertices.push_back({p1 * blockScale + center, {0, 1}});
-                vertices.push_back({p2 * blockScale + center, {1, 1}});
+                vertices.push_back({p1 * blockScale + center, {0, p}});
+                vertices.push_back({p2 * blockScale + center, {p, p}});
 
-                vertices.push_back({p2 * blockScale + center, {1, 1}});
-                vertices.push_back({p3 * blockScale + center, {1, 0}});
+                vertices.push_back({p2 * blockScale + center, {p, p}});
+                vertices.push_back({p3 * blockScale + center, {p, 0}});
                 vertices.push_back({p0 * blockScale + center, {0, 0}});
             };
 
             // top
-            addFace(glm::vec3(-1, 1, -1), glm::vec3(-1, 1, 1), glm::vec3(1, 1, 1), glm::vec3(1, 1, -1));
+            addFace(glm::vec3(-p, p, -p), glm::vec3(-p, p, p), glm::vec3(p, p, p), glm::vec3(p, p, -p));
 
             // bottom
-            addFace(glm::vec3(1, -1, -1), glm::vec3(1, -1, 1), glm::vec3(-1, -1, 1), glm::vec3(-1, -1, -1));
+            addFace(glm::vec3(p, -p, -p), glm::vec3(p, -p, p), glm::vec3(-p, -p, p), glm::vec3(-p, -p, -p));
 
             // right
-            addFace(glm::vec3(-1, -1, -1), glm::vec3(-1, -1, 1), glm::vec3(-1, 1, 1), glm::vec3(-1, 1, -1));
+            addFace(glm::vec3(-p, -p, -p), glm::vec3(-p, -p, p), glm::vec3(-p, p, p), glm::vec3(-p, p, -p));
 
             // left
-            addFace(glm::vec3(1, 1, -1), glm::vec3(1, 1, 1), glm::vec3(1, -1, 1), glm::vec3(1, -1, -1));
+            addFace(glm::vec3(p, p, -p), glm::vec3(p, p, p), glm::vec3(p, -p, p), glm::vec3(p, -p, -p));
 
             // back
-            addFace(glm::vec3(-1, -1, -1), glm::vec3(-1, 1, -1), glm::vec3(1, 1, -1), glm::vec3(1, -1, -1));
+            addFace(glm::vec3(-p, -p, -p), glm::vec3(-p, p, -p), glm::vec3(p, p, -p), glm::vec3(p, -p, -p));
 
             // front
-            addFace(glm::vec3(1, -1, 1), glm::vec3(1, 1, 1), glm::vec3(-1, 1, 1), glm::vec3(-1, -1, 1));
+            addFace(glm::vec3(p, -p, p), glm::vec3(p, p, p), glm::vec3(-p, p, p), glm::vec3(-p, -p, p));
         }
 
         auto mesh = std::make_unique<Mesh>();
@@ -195,17 +199,18 @@ std::unique_ptr<Shape> initializeShape(const Blocks &blocks, const glm::imat4x4 
     };
 
     glm::vec3 center = std::accumulate(blocks.begin(), blocks.end(), glm::ivec3(0));
-    center *= 1.0f / blocks.size();
+    const auto scaleRatio = 1.0f;
+    center *= scaleRatio * 1.0f / blocks.size();
 
-    const auto rx = glm::rotate(glm::mat4(1), 0.25f * glm::pi<float>(), glm::vec3(1, 0, 0));
-    const auto rz = glm::rotate(glm::mat4(1), 0.25f * glm::pi<float>(), glm::vec3(0, 0, 1));
+    const auto rx = glm::rotate(glm::mat4(1), 0.25f * glm::pi<float>(), glm::vec3(scaleRatio, 0, 0));
+    const auto rz = glm::rotate(glm::mat4(1), 0.25f * glm::pi<float>(), glm::vec3(0, 0, scaleRatio));
     const auto rotation = glm::quat_cast(rx * rz * glm::mat4(baseRotation));
 
     auto shape = std::make_unique<Shape>();
     shape->blocks = blocks;
     shape->center = center;
-    shape->mesh = makeMesh(1.0f);
-    shape->outlineMesh = makeMesh(1.25f);
+    shape->mesh = makeMesh(scaleRatio);
+    shape->outlineMesh = makeMesh(1.25f * scaleRatio);
     shape->baseRotation = baseRotation;
     shape->rotation = rotation;
 
@@ -291,7 +296,8 @@ void Demo::renderShapes() const
         }();
 
         const auto r = glm::mat4_cast(rotation) * shape->wobble.rotation();
-        const auto model = r * t;
+        glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)); // Last factor for scale
+        const auto model = scaleMatrix * r * t;
 
         const auto mvp = projection * view * model;
 
@@ -303,11 +309,11 @@ void Demo::renderShapes() const
                 switch (m_state)
                 {
                 case State::Fail:
-                    return glm::vec3(220.0f/255.0f, 50.0f/255.0f, 47.0f/255.0f);
+                    return glm::vec3(220.0f / 255.0f, 50.0f / 255.0f, 47.0f / 255.0f);
                 case State::Success:
-                    return glm::vec3(133.0f/255.0f, 153.0f/255.0f, 0.0f/255.0f);
+                    return glm::vec3(133.0f / 255.0f, 153.0f / 255.0f, 0.0f / 255.0f);
                 default:
-                    return glm::vec3(181.0f/255.0f, 137.0f/255.0f, 0.0f/255.0f);
+                    return glm::vec3(181.0f / 255.0f, 137.0f / 255.0f, 0.0f / 255.0f);
                 }
             }();
             if (m_state == State::Result)
@@ -336,8 +342,9 @@ void Demo::renderShapes() const
             }
             return 0.0f;
         }();
-        //m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(BackgroundColor, bgAlpha));
-        m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(glm::vec3(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f), .7));
+        // m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(BackgroundColor, bgAlpha));
+        m_shaderManager->setUniform(ShaderManager::MixColor,
+                                    glm::vec4(glm::vec3(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f), .7));
         glEnable(GL_DEPTH_TEST);
         shape->mesh->render(GL_TRIANGLES);
     }
@@ -415,13 +422,14 @@ void Demo::renderTimer() const
 
     const auto totalAdvance = bigAdvance; // + smallAdvance;
 
-    const auto textPos = glm::vec2(-0.5 * totalAdvance, -0.8 * m_canvasHeight + 0);
+    const auto textPos = glm::vec2(-0.5 * totalAdvance, -0.75 * m_canvasHeight + 0);
 
     m_uiPainter->setFont(FontSmall);
-    m_uiPainter->drawText(textPos, glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, alpha), 0, bigText);
+    m_uiPainter->drawText(textPos, glm::vec4(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f, alpha), 0, bigText);
 
-    //m_uiPainter->setFont(FontSmall);
-    //m_uiPainter->drawText(textPos + glm::vec2(bigAdvance, 0), glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, alpha), 0, smallText);
+    // m_uiPainter->setFont(FontSmall);
+    // m_uiPainter->drawText(textPos + glm::vec2(bigAdvance, 0), glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f,
+    // alpha), 0, smallText);
 }
 
 void Demo::renderIntro() const
@@ -429,7 +437,7 @@ void Demo::renderIntro() const
     static const UIPainter::Font FontBig{FontName, 60};
     static const UIPainter::Font FontSmall{FontName, 40};
 
-    const auto color = glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, 1.0);
+    const auto color = glm::vec4(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f, 1.0);
 
     m_uiPainter->setFont(FontBig);
     drawCenteredText(glm::vec2(0, -40), color, "SELECT THE MATCHING PAIR"s);
@@ -450,7 +458,7 @@ void Demo::renderScore() const
             return 0.0f;
         return std::min(1.0f, (m_stateTime - StartTime) / FadeInTime);
     }();
-    const auto color = glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, 1.0);
+    const auto color = Yellow;
 
     m_uiPainter->setFont(FontBig);
 
@@ -487,8 +495,10 @@ void Demo::drawCenteredText(const glm::vec2 &pos, const glm::vec4 &color, const 
 
 void Demo::update(float elapsed)
 {
-    if(m_state != State::Success){
-        for (auto &shape : m_shapes){
+    if (m_state != State::Success)
+    {
+        for (auto &shape : m_shapes)
+        {
             shape->wobble.update(elapsed);
         }
     }
