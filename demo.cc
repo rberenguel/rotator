@@ -23,10 +23,12 @@ namespace
 constexpr const auto ShapeCount = 6;
 constexpr const auto ShapeSegments = 4;
 
-constexpr const auto Columns = 3;
+constexpr const auto Columns = 2;
 constexpr const auto TopMargin = 40;
 
-constexpr const auto BackgroundColor = glm::vec3(0.0f/255.0f, 21.0f/255.0f, 27.0f/255.0f); // Half of dark solarized base
+constexpr const auto BackgroundColor = glm::vec3(21.0f/255.0f, 21.0f/255.0f, 21.0f/255.0f);
+
+//glm::vec3(0.0f/255.0f, 21.0f/255.0f, 27.0f/255.0f); // Half of dark solarized base
 
 constexpr const auto TotalPlayTime = 120.0f;
 
@@ -335,7 +337,7 @@ void Demo::renderShapes() const
             return 0.0f;
         }();
         //m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(BackgroundColor, bgAlpha));
-        m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(glm::vec3(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f), .5));
+        m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(glm::vec3(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f), .7));
         glEnable(GL_DEPTH_TEST);
         shape->mesh->render(GL_TRIANGLES);
     }
@@ -413,7 +415,7 @@ void Demo::renderTimer() const
 
     const auto totalAdvance = bigAdvance; // + smallAdvance;
 
-    const auto textPos = glm::vec2(-0.5 * totalAdvance, -0.5 * m_canvasHeight + 50);
+    const auto textPos = glm::vec2(-0.5 * totalAdvance, -0.8 * m_canvasHeight + 0);
 
     m_uiPainter->setFont(FontSmall);
     m_uiPainter->drawText(textPos, glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f, alpha), 0, bigText);

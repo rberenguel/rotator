@@ -15,9 +15,9 @@ void main(void)
     vec2 edgeLow = smoothstep(vec2(edgeWidth), vec2(edgeWidth + blur), vs_texCoord);
     vec2 edgeHigh = smoothstep(vec2(1.0) - vec2(edgeWidth), vec2(1.0) - vec2(edgeWidth + blur), vs_texCoord);
     float edge = 1.2*edgeLow.x * edgeLow.y * edgeHigh.x * edgeHigh.y;
-    fragColor = mixColor.a*vec4(mix(vec3(edge), mixColor.rgb, 1.0), 1.0);
-    if(edge < 0.5){
+    fragColor = 1.2*mixColor.a*vec4(mix(vec3(edge), mixColor.rgb, 1.0), 1.0);
+    if(edge < 0.8){
         //fragColor = vec4(0.0);
-        fragColor = vec4(203.0/255.0, 75.0/255.0, 22.0/255.0, 0.5);
+        fragColor = vec4(1.0f, 0.58f, 0.0f, 1.0f);
     }
 }
