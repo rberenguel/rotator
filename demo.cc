@@ -22,9 +22,14 @@ namespace
 {
 constexpr const auto ShapeCount = 6;
 
-// TODO: dynamically increase shape segments and reduce scale in scale matrix if that changes
+auto ShapeSegments = 4;
+auto Scale = 1.0;
+auto LevelChange = false;
 
-constexpr const auto ShapeSegments = 4;
+constexpr const auto TotalPlayTime = 120.0f; // Seconds
+
+constexpr const auto LevelUpScore = 10;
+constexpr const auto LevelDownScore = 5;
 
 constexpr const auto Columns = 2;
 constexpr const auto TopMargin = 40;
@@ -32,8 +37,6 @@ constexpr const auto TopMargin = 40;
 constexpr const auto BackgroundColor = glm::vec3(21.0f / 255.0f, 21.0f / 255.0f, 21.0f / 255.0f);
 constexpr const auto Orange = glm::vec4(200.0f / 255.0f, 100.0f / 255.0f, 0.0f / 255.0f, 1.0);
 constexpr const auto Yellow = glm::vec4(250.0f / 255.0f, 250.0f / 255.0f, 0.0f / 255.0f, 1.0);
-
-constexpr const auto TotalPlayTime = 120.0f;
 
 constexpr const auto FadeOutTime = 2.0f;
 constexpr const auto SuccessStateTime = 2.0f;
@@ -296,7 +299,7 @@ void Demo::renderShapes() const
         }();
 
         const auto r = glm::mat4_cast(rotation) * shape->wobble.rotation();
-        glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f)); // Last factor for scale
+        glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(Scale)); // Last factor for scale
         const auto model = scaleMatrix * r * t;
 
         const auto mvp = projection * view * model;
@@ -471,7 +474,7 @@ void Demo::renderScore() const
 
     if (m_score > 0)
     {
-        const auto accuracyText = [this] {
+        /*const auto accuracyText = [this] {
             std::stringstream ss;
             ss << "ACCURACY: ";
             ss << std::fixed;
@@ -479,12 +482,19 @@ void Demo::renderScore() const
             ss << m_score * 100.0f / m_attempts;
             ss << "%";
             return ss.str();
-        }();
-        drawCenteredText(glm::vec2(0, 20), color, accuracyText);
+        }();*/
+        if (m_score >= LevelUpScore && LevelChange)
+        {
+            drawCenteredText(glm::vec2(0, 20), color, "LEVEL UP");
+        }
+    }
+    if (m_score <= LevelDownScore && LevelChange)
+    {
+        drawCenteredText(glm::vec2(0, 20), color, "LEVEL DOWN");
     }
 
     m_uiPainter->setFont(FontSmall);
-    drawCenteredText(glm::vec2(0, 200), color, "TAP TO RETRY"s);
+    drawCenteredText(glm::vec2(0, 200), color, "TAP TO CONTINUE"s);
 }
 
 void Demo::drawCenteredText(const glm::vec2 &pos, const glm::vec4 &color, const std::string &text) const
@@ -526,7 +536,45 @@ void Demo::update(float elapsed)
     case State::Playing:
         m_playTime += elapsed;
         if (m_playTime > TotalPlayTime)
+        {
+            if (m_state != State::Result)
+            {
+                LevelChange = false;
+                if (m_score >= LevelUpScore)
+                {
+                    if (ShapeSegments <= 6)
+                    {
+                        ShapeSegments++;
+                        LevelChange = true;
+                    }
+                }
+                if (m_score <= LevelDownScore)
+                {
+                    if (ShapeSegments >= 5)
+                    {
+                        ShapeSegments--;
+                        LevelChange = true;
+                    }
+                }
+                switch (ShapeSegments)
+                {
+                case 4:
+                    Scale = 1.0;
+                    break;
+                case 5:
+                    Scale = 0.9;
+                    break;
+                case 6:
+                    Scale = 0.8;
+                    break;
+                case 7:
+                    Scale = 0.7;
+                    break;
+                }
+            }
             setState(State::Result);
+        }
+
         break;
     case State::Result:
         break;
