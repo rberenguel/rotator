@@ -321,7 +321,7 @@ void Demo::renderShapes() const
             }();
             if (m_state == State::Result)
                 color = glm::mix(color, BackgroundColor, std::min(1.0f, m_stateTime / FadeOutTime));
-            m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(color, 1));
+            m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(color, 1.0)); //AAAA
             glDisable(GL_DEPTH_TEST);
             shape->outlineMesh->render(GL_TRIANGLES);
         }
@@ -330,7 +330,7 @@ void Demo::renderShapes() const
             switch (m_state)
             {
             case State::Result: {
-                auto alpha = std::min(1.0f, m_stateTime / FadeOutTime);
+                auto alpha = std::max(.7f, m_stateTime / FadeOutTime);
                 if (i == m_firstShape || i == m_secondShape)
                     alpha *= 0.5f;
                 return alpha;
@@ -343,11 +343,11 @@ void Demo::renderShapes() const
             default:
                 break;
             }
-            return 0.0f;
+            return .7f;
         }();
         // m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(BackgroundColor, bgAlpha));
         m_shaderManager->setUniform(ShaderManager::MixColor,
-                                    glm::vec4(glm::vec3(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f), .7));
+                                    glm::vec4(glm::vec3(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f), bgAlpha));
         glEnable(GL_DEPTH_TEST);
         shape->mesh->render(GL_TRIANGLES);
     }
@@ -429,6 +429,19 @@ void Demo::renderTimer() const
 
     m_uiPainter->setFont(FontSmall);
     m_uiPainter->drawText(textPos, glm::vec4(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f, alpha), 0, bigText);
+
+    const auto scorePos = glm::vec2(0.5 * m_canvasWidth, -0.75 * m_canvasHeight + 0);
+
+    const auto local_score = m_score;
+
+    const auto score = [local_score] {
+        std::stringstream ss;
+        ss << local_score;
+        return ss.str();
+    }();
+
+    m_uiPainter->setFont(FontSmall);
+    m_uiPainter->drawText(scorePos, Orange, 0, score);
 
     // m_uiPainter->setFont(FontSmall);
     // m_uiPainter->drawText(textPos + glm::vec2(bigAdvance, 0), glm::vec4(42.0f/255.0f, 161.0f/255.0f, 152.0f/255.0f,
