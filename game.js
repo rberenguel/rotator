@@ -192,7 +192,7 @@ Module['FS_createPath']("/assets", "shaders", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/assets/.DS_Store", "start": 0, "end": 6148}, {"filename": "/assets/fonts/OpenSans_Regular.ttf", "start": 6148, "end": 223508}, {"filename": "/assets/fonts/monoid-regular.ttf", "start": 223508, "end": 272560}, {"filename": "/assets/shaders/shape.frag", "start": 272560, "end": 273205}, {"filename": "/assets/shaders/shape.vert", "start": 273205, "end": 273432}, {"filename": "/assets/shaders/text.frag", "start": 273432, "end": 273723}, {"filename": "/assets/shaders/text.vert", "start": 273723, "end": 274026}], "remote_package_size": 274026});
+    loadPackage({"files": [{"filename": "/assets/.DS_Store", "start": 0, "end": 6148}, {"filename": "/assets/fonts/OpenSans_Regular.ttf", "start": 6148, "end": 223508}, {"filename": "/assets/fonts/monoid-regular.ttf", "start": 223508, "end": 272560}, {"filename": "/assets/shaders/shape.frag", "start": 272560, "end": 273192}, {"filename": "/assets/shaders/shape.vert", "start": 273192, "end": 273419}, {"filename": "/assets/shaders/text.frag", "start": 273419, "end": 273710}, {"filename": "/assets/shaders/text.vert", "start": 273710, "end": 274013}], "remote_package_size": 274013});
 
   })();
 

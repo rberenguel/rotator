@@ -485,12 +485,12 @@ void Demo::renderScore() const
         }();*/
         if (m_score >= LevelUpScore && LevelChange)
         {
-            drawCenteredText(glm::vec2(0, 20), color, "LEVEL UP");
+            drawCenteredText(glm::vec2(0, 20), color, "LEVEL UP"s);
         }
     }
     if (m_score <= LevelDownScore && LevelChange)
     {
-        drawCenteredText(glm::vec2(0, 20), color, "LEVEL DOWN");
+        drawCenteredText(glm::vec2(0, 20), color, "LEVEL DOWN"s);
     }
 
     m_uiPainter->setFont(FontSmall);
