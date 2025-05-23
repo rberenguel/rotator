@@ -9,7 +9,10 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include <GL/glew.h>
-
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#endif
 #include <random>
 #include <algorithm>
 #include <sstream>
@@ -18,9 +21,18 @@
 
 using namespace std::string_literals;
 
+namespace GlobalGameParams
+{
+int ShapeCount = 6; // Default value
+// These will store the dimensions passed from JS or defaults
+int CanvasWidth = 550;
+int CanvasHeight = 900;
+int Columns = 2;
+}
+
 namespace
 {
-constexpr const auto ShapeCount = 6;
+// constexpr const auto ShapeCount = 6;
 
 auto ShapeSegments = 4;
 auto Scale = 1.0;
@@ -31,8 +43,7 @@ constexpr const auto TotalPlayTime = 120.0f; // Seconds
 constexpr const auto LevelUpScore = 10;
 constexpr const auto LevelDownScore = 5;
 
-constexpr const auto Columns = 2;
-constexpr const auto TopMargin = 40;
+constexpr const auto TopMargin = 0;
 
 constexpr const auto BackgroundColor = glm::vec3(21.0f / 255.0f, 21.0f / 255.0f, 21.0f / 255.0f);
 constexpr const auto Orange = glm::vec4(200.0f / 255.0f, 100.0f / 255.0f, 0.0f / 255.0f, 1.0);
@@ -226,7 +237,7 @@ Demo::Demo(int canvasWidth, int canvasHeight)
     , m_canvasHeight(canvasHeight)
     , m_shaderManager(new ShaderManager)
     , m_uiPainter(new UIPainter(m_shaderManager.get()))
-    , m_shakes(ShapeCount)
+    , m_shakes(GlobalGameParams::ShapeCount)
 {
     m_uiPainter->resize(canvasWidth, canvasHeight);
     initialize();
@@ -259,15 +270,16 @@ void Demo::renderShapes() const
 
     m_shaderManager->useProgram(ShaderManager::Shape);
 
-    const auto viewportWidth = m_canvasWidth / Columns;
-    const auto viewportHeight = (m_canvasHeight - TopMargin) / ((m_shapes.size() + Columns - 1) / Columns);
+    const auto viewportWidth = m_canvasWidth / GlobalGameParams::Columns;
+    const auto viewportHeight =
+        (m_canvasHeight - TopMargin) / ((m_shapes.size() + GlobalGameParams::Columns - 1) / GlobalGameParams::Columns);
 
     for (size_t i = 0; i < m_shapes.size(); ++i)
     {
         const auto &shape = m_shapes[i];
 
-        const auto viewportX = (i % Columns) * viewportWidth;
-        const auto viewportY = (i / Columns) * viewportHeight;
+        const auto viewportX = (i % GlobalGameParams::Columns) * viewportWidth;
+        const auto viewportY = (i / GlobalGameParams::Columns) * viewportHeight;
         glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
 
         const auto projection =
@@ -321,7 +333,7 @@ void Demo::renderShapes() const
             }();
             if (m_state == State::Result)
                 color = glm::mix(color, BackgroundColor, std::min(1.0f, m_stateTime / FadeOutTime));
-            m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(color, 1.0)); //AAAA
+            m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(color, 1.0)); // AAAA
             glDisable(GL_DEPTH_TEST);
             shape->outlineMesh->render(GL_TRIANGLES);
         }
@@ -424,13 +436,19 @@ void Demo::renderTimer() const
     const auto smallAdvance = m_uiPainter->horizontalAdvance(smallText);
 
     const auto totalAdvance = bigAdvance; // + smallAdvance;
+    // Note that the coordinates have 0:0 in the center
+    // and there is something funky about the assumed size
+    // of the SDL area I think, otherwise I would not have
+    // all these weird things.
+    const auto top = m_canvasHeight > 600 ? -0.78 * m_canvasHeight : -0.45 * m_canvasHeight;
 
-    const auto textPos = glm::vec2(-0.5 * totalAdvance, -0.75 * m_canvasHeight + 0);
+    const auto textPos = glm::vec2(-0.5 * totalAdvance, top);
 
     m_uiPainter->setFont(FontSmall);
     m_uiPainter->drawText(textPos, glm::vec4(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f, alpha), 0, bigText);
 
-    const auto scorePos = glm::vec2(0.5 * m_canvasWidth, -0.75 * m_canvasHeight + 0);
+    const auto right = m_canvasWidth > 600 ? 0.35 * m_canvasWidth : 0.5 * m_canvasWidth;
+    const auto scorePos = glm::vec2(right, top);
 
     const auto local_score = m_score;
 
@@ -608,11 +626,11 @@ void Demo::initializeShapes()
         std::random_device rd;
         return std::mt19937(rd());
     }();
-    m_firstShape = std::uniform_int_distribution<int>(0, ShapeCount - 2)(generator);
-    m_secondShape = std::uniform_int_distribution<int>(m_firstShape + 1, ShapeCount - 1)(generator);
+    m_firstShape = std::uniform_int_distribution<int>(0, GlobalGameParams::ShapeCount - 2)(generator);
+    m_secondShape = std::uniform_int_distribution<int>(m_firstShape + 1, GlobalGameParams::ShapeCount - 1)(generator);
 
     m_shapes.clear();
-    for (int i = 0; i < ShapeCount; ++i)
+    for (int i = 0; i < GlobalGameParams::ShapeCount; ++i)
     {
         auto blocks = [this, i] {
             if (i == m_secondShape)
@@ -698,11 +716,12 @@ void Demo::handleMouseButton(int x, int y)
         break;
     case State::Playing: {
         const auto shapeIndex = [this, x, y = m_canvasHeight - y] {
-            const auto viewportWidth = m_canvasWidth / Columns;
-            const auto viewportHeight = (m_canvasHeight - TopMargin) / ((m_shapes.size() + Columns - 1) / Columns);
+            const auto viewportWidth = m_canvasWidth / GlobalGameParams::Columns;
+            const auto viewportHeight = (m_canvasHeight - TopMargin) /
+                                        ((m_shapes.size() + GlobalGameParams::Columns - 1) / GlobalGameParams::Columns);
             const auto row = y / viewportHeight;
             const auto col = x / viewportWidth;
-            return row * Columns + col;
+            return row * GlobalGameParams::Columns + col;
         }();
         toggleShapeSelection(shapeIndex);
         break;
@@ -755,3 +774,26 @@ void Demo::toggleShapeSelection(int index)
         }
     }
 }
+
+extern "C" {
+EMSCRIPTEN_KEEPALIVE
+void set_shape_count(int count)
+{
+    GlobalGameParams::ShapeCount = count;
+}
+
+void set_columns(int num)
+{
+    GlobalGameParams::Columns = num;
+}
+
+EMSCRIPTEN_KEEPALIVE
+void set_canvas_dimensions(int width, int height)
+{
+    GlobalGameParams::CanvasWidth = width;
+    GlobalGameParams::CanvasHeight = height;
+    // No direct call to emscripten_set_canvas_element_size here for initial setup.
+    // If dynamic resize *after* SDL_Init is needed, then it might be called from JS directly
+    // or from C++ if properly linked.
+}
+} // extern "C"

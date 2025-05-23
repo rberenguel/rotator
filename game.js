@@ -8395,6 +8395,14 @@ function dbg(...args) {
 
 
 
+  
+  var stringToUTF8OnStack = (str) => {
+      var size = lengthBytesUTF8(str) + 1;
+      var ret = stackAlloc(size);
+      stringToUTF8(str, ret, size);
+      return ret;
+    };
+
 
 
 
@@ -8603,7 +8611,9 @@ var wasmImports = {
 };
 var wasmExports = createWasm();
 var ___wasm_call_ctors = createExportWrapper('__wasm_call_ctors');
-var _main = Module['_main'] = createExportWrapper('main');
+var _main = Module['_main'] = createExportWrapper('__main_argc_argv');
+var _set_canvas_dimensions = Module['_set_canvas_dimensions'] = createExportWrapper('set_canvas_dimensions');
+var _set_shape_count = Module['_set_shape_count'] = createExportWrapper('set_shape_count');
 var _memcpy = createExportWrapper('memcpy');
 var _malloc = createExportWrapper('malloc');
 var _free = createExportWrapper('free');
@@ -8696,7 +8706,6 @@ var missingLibrarySymbols = [
   'UTF32ToString',
   'stringToUTF32',
   'lengthBytesUTF32',
-  'stringToUTF8OnStack',
   'registerKeyEventCallback',
   'maybeCStringToJsString',
   'findEventTarget',
@@ -8851,6 +8860,7 @@ var unexportedSymbols = [
   'stringToAscii',
   'UTF16Decoder',
   'stringToNewUTF8',
+  'stringToUTF8OnStack',
   'writeArrayToMemory',
   'JSEvents',
   'specialHTMLTargets',
@@ -8927,14 +8937,22 @@ dependenciesFulfilled = function runCaller() {
   if (!calledRun) dependenciesFulfilled = runCaller; // try this again later, after new deps are fulfilled
 };
 
-function callMain() {
+function callMain(args = []) {
   assert(runDependencies == 0, 'cannot call main when async dependencies remain! (listen on Module["onRuntimeInitialized"])');
   assert(__ATPRERUN__.length == 0, 'cannot call main when preRun functions remain to be called');
 
   var entryFunction = _main;
 
-  var argc = 0;
-  var argv = 0;
+  args.unshift(thisProgram);
+
+  var argc = args.length;
+  var argv = stackAlloc((argc + 1) * 4);
+  var argv_ptr = argv;
+  args.forEach((arg) => {
+    HEAPU32[((argv_ptr)>>2)] = stringToUTF8OnStack(arg);
+    argv_ptr += 4;
+  });
+  HEAPU32[((argv_ptr)>>2)] = 0;
 
   try {
 
@@ -8958,7 +8976,7 @@ function stackCheckInit() {
   writeStackCookie();
 }
 
-function run() {
+function run(args = arguments_) {
 
   if (runDependencies > 0) {
     return;
@@ -8988,7 +9006,7 @@ function run() {
 
     if (Module['onRuntimeInitialized']) Module['onRuntimeInitialized']();
 
-    if (shouldRunNow) callMain();
+    if (shouldRunNow) callMain(args);
 
     postRun();
   }
