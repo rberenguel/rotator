@@ -5,7 +5,7 @@
 Changes in this fork:
 
 - Installable as a basic PWA on mobile devices or desktop
-- Dark mode palete (forced, because I want dark model always)
+- Dark mode palete (forced, because I want dark mode always)
 - Base layout optimised for iPhone, with 2 columns of 3 shapes
 - Harder layout on iPad, with more shapes to choose from (or pass the URL parameter `?wide=true` on a browser)
 - Levelling up by adding more segments (from the base 4 to 7) and down automatically
