@@ -8,7 +8,9 @@ Changes in this fork:
 - Dark mode palete (forced, because I want dark mode always)
 - Base layout optimised for iPhone, with 2 columns of 3 shapes
 - Harder layout on iPad, with more shapes to choose from (or pass the URL parameter `?wide=true` on a browser)
+- Time is now a function of number of shapes (2 minutes by default, 4 on wide/hard)
 - Levelling up by adding more segments (from the base 4 to 7) and down automatically
+- Increase wobbliness to make it easier to see the whole of the shape… and also more confusing to solve
 - Randomised color for each shape to make it more confusing to solve
 
 ## Emscripten steps

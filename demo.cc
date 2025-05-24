@@ -38,7 +38,7 @@ auto ShapeSegments = 4;
 auto Scale = 1.0;
 auto LevelChange = false;
 
-constexpr const auto TotalPlayTime = 120.0f; // Seconds
+// constexpr const auto TotalPlayTime = 120.0f; // Seconds
 
 constexpr const auto LevelUpScore = 10;
 constexpr const auto LevelDownScore = 5;
@@ -105,6 +105,12 @@ constexpr const std::array<glm::imat4x4, 24> Rotations = {
     glm::imat4x4{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}};
 
 constexpr const char *FontName = "monoid-regular.ttf";
+
+float totalPlayTime()
+{
+    // 120s on iPhone (or default), otherwise 240s on wide/hard
+    return GlobalGameParams::ShapeCount * 20.0f;
+}
 
 Blocks rotated(const Blocks &shape, const glm::imat4x4 &rotation)
 {
@@ -439,7 +445,7 @@ void Demo::renderTimer() const
     static const UIPainter::Font FontBig{FontName, 80};
     static const UIPainter::Font FontSmall{FontName, 40};
 
-    const auto remaining = std::max(0, static_cast<int>((TotalPlayTime - m_playTime) * 1000));
+    const auto remaining = std::max(0, static_cast<int>((totalPlayTime() - m_playTime) * 1000));
     const auto bigText = [remaining] {
         std::stringstream ss;
         ss.fill('0');
@@ -603,7 +609,7 @@ void Demo::update(float elapsed)
         [[fallthrough]];
     case State::Playing:
         m_playTime += elapsed;
-        if (m_playTime > TotalPlayTime)
+        if (m_playTime > totalPlayTime())
         {
             if (m_state != State::Result)
             {
