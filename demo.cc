@@ -49,6 +49,31 @@ constexpr const auto BackgroundColor = glm::vec3(21.0f / 255.0f, 21.0f / 255.0f,
 constexpr const auto Orange = glm::vec4(200.0f / 255.0f, 100.0f / 255.0f, 0.0f / 255.0f, 1.0);
 constexpr const auto Yellow = glm::vec4(250.0f / 255.0f, 250.0f / 255.0f, 0.0f / 255.0f, 1.0);
 
+constexpr float vh = 130.0f / 255.0f; // 0.8f
+constexpr float vm = 65.0f / 255.0f;  // 0.4f
+constexpr float vl = 0.0f / 255.0f;   // 0.0f
+constexpr float ga = 0.8f;
+
+constexpr const std::array<glm::vec4, 12> GeneratedColors = {
+    // Primary colors (one component 204, others 0)
+    glm::vec4(vh, vl, vl, ga), // 1. Red
+    glm::vec4(vl, vh, vl, ga), // 2. Green
+    glm::vec4(vl, vl, vh, ga), // 3. Blue
+
+    // Secondary colors (two components 204, one 0)
+    glm::vec4(vh, vh, vl, ga), // 4. Yellow (204, 204, 0)
+    glm::vec4(vh, vl, vh, ga), // 5. Magenta (204, 0, 204)
+    glm::vec4(vl, vh, vh, ga), // 6. Cyan (0, 204, 204)
+
+    // Tertiary-like colors (one 204, one 102, one 0)
+    glm::vec4(vh, vm, vl, ga), // 7. Orange (204, 102, 0)
+    glm::vec4(vh, vl, vm, ga), // 8. Rose (204, 0, 102)
+    glm::vec4(vm, vh, vl, ga), // 9. Chartreuse Green (102, 204, 0)
+    glm::vec4(vl, vh, vm, ga), // 10. Spring Green (0, 204, 102)
+    glm::vec4(vm, vl, vh, ga), // 11. Violet (102, 0, 204)
+    glm::vec4(vl, vm, vh, ga)  // 12. Azure (0, 102, 204)
+};
+
 constexpr const auto FadeOutTime = 2.0f;
 constexpr const auto SuccessStateTime = 2.0f;
 constexpr const auto FailStateTime = 1.0f;
@@ -184,19 +209,14 @@ std::unique_ptr<Shape> initializeShape(const Blocks &blocks, const glm::imat4x4 
 
             // top
             addFace(glm::vec3(-p, p, -p), glm::vec3(-p, p, p), glm::vec3(p, p, p), glm::vec3(p, p, -p));
-
             // bottom
             addFace(glm::vec3(p, -p, -p), glm::vec3(p, -p, p), glm::vec3(-p, -p, p), glm::vec3(-p, -p, -p));
-
             // right
             addFace(glm::vec3(-p, -p, -p), glm::vec3(-p, -p, p), glm::vec3(-p, p, p), glm::vec3(-p, p, -p));
-
             // left
             addFace(glm::vec3(p, p, -p), glm::vec3(p, p, p), glm::vec3(p, -p, p), glm::vec3(p, -p, -p));
-
             // back
             addFace(glm::vec3(-p, -p, -p), glm::vec3(-p, p, -p), glm::vec3(p, p, -p), glm::vec3(p, -p, -p));
-
             // front
             addFace(glm::vec3(p, -p, p), glm::vec3(p, p, p), glm::vec3(-p, p, p), glm::vec3(-p, -p, p));
         }
@@ -214,10 +234,17 @@ std::unique_ptr<Shape> initializeShape(const Blocks &blocks, const glm::imat4x4 
 
     glm::vec3 center = std::accumulate(blocks.begin(), blocks.end(), glm::ivec3(0));
     const auto scaleRatio = 1.0f;
-    center *= scaleRatio * 1.0f / blocks.size();
+    if (!blocks.empty())
+    { // Added check to prevent division by zero, common practice.
+        center *= scaleRatio * 1.0f / blocks.size();
+    }
+    else
+    {
+        center = glm::vec3(0.0f); // Or handle as an error/specific case
+    }
 
-    const auto rx = glm::rotate(glm::mat4(1), 0.25f * glm::pi<float>(), glm::vec3(scaleRatio, 0, 0));
-    const auto rz = glm::rotate(glm::mat4(1), 0.25f * glm::pi<float>(), glm::vec3(0, 0, scaleRatio));
+    const auto rx = glm::rotate(glm::mat4(1.0f), 0.25f * glm::pi<float>(), glm::vec3(scaleRatio, 0.0f, 0.0f));
+    const auto rz = glm::rotate(glm::mat4(1.0f), 0.25f * glm::pi<float>(), glm::vec3(0.0f, 0.0f, scaleRatio));
     const auto rotation = glm::quat_cast(rx * rz * glm::mat4(baseRotation));
 
     auto shape = std::make_unique<Shape>();
@@ -228,9 +255,19 @@ std::unique_ptr<Shape> initializeShape(const Blocks &blocks, const glm::imat4x4 
     shape->baseRotation = baseRotation;
     shape->rotation = rotation;
 
+    // --- Add random color selection ---
+    static std::mt19937 generator = [] {
+        std::random_device rd;
+        return std::mt19937(rd());
+    }();
+    static std::uniform_int_distribution<int> distribution(0, static_cast<int>(GeneratedColors.size() - 1));
+    shape->baseColor = GeneratedColors[distribution(generator)];
+    // --- End random color selection ---
+
     return shape;
 }
-}
+
+} // End namespace
 
 Demo::Demo(int canvasWidth, int canvasHeight)
     : m_canvasWidth(canvasWidth)
@@ -358,8 +395,8 @@ void Demo::renderShapes() const
             return .7f;
         }();
         // m_shaderManager->setUniform(ShaderManager::MixColor, glm::vec4(BackgroundColor, bgAlpha));
-        m_shaderManager->setUniform(ShaderManager::MixColor,
-                                    glm::vec4(glm::vec3(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f), bgAlpha));
+        // old cyan: glm::vec4(glm::vec3(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f), bgAlpha)
+        m_shaderManager->setUniform(ShaderManager::MixColor, shape->baseColor);
         glEnable(GL_DEPTH_TEST);
         shape->mesh->render(GL_TRIANGLES);
     }

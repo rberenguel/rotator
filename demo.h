@@ -26,6 +26,7 @@ struct Shape
     glm::quat rotation;
     bool selected = false;
     Wobble wobble = Wobble{0.5f};
+    glm::vec4 baseColor;
 };
 
 enum class Key
