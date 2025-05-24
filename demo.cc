@@ -74,6 +74,9 @@ constexpr const std::array<glm::vec4, 12> GeneratedColors = {
     glm::vec4(vl, vm, vh, ga)  // 12. Azure (0, 102, 204)
 };
 
+constexpr const auto GeneratedGreen = GeneratedColors[1];
+constexpr const auto GeneratedCyan = GeneratedColors[5];
+
 constexpr const auto FadeOutTime = 2.0f;
 constexpr const auto SuccessStateTime = 2.0f;
 constexpr const auto FailStateTime = 1.0f;
@@ -511,16 +514,20 @@ void Demo::renderTimer() const
 
 void Demo::renderIntro() const
 {
+    static const UIPainter::Font FontHuge{FontName, 80};
     static const UIPainter::Font FontBig{FontName, 60};
     static const UIPainter::Font FontSmall{FontName, 40};
 
     const auto color = glm::vec4(42.0f / 255.0f, 161.0f / 255.0f, 152.0f / 255.0f, 1.0);
 
+    m_uiPainter->setFont(FontHuge);
+    drawCenteredText(glm::vec2(0, -120), GeneratedCyan, "ROTATOR"s);
     m_uiPainter->setFont(FontBig);
-    drawCenteredText(glm::vec2(0, -40), color, "SELECT THE MATCHING PAIR"s);
+    drawCenteredText(glm::vec2(0, -40), color, "SELECT THE MATCHING"s);
+    drawCenteredText(glm::vec2(0, 10), color, "PAIR OF SHAPES"s);
 
     m_uiPainter->setFont(FontSmall);
-    drawCenteredText(glm::vec2(0, 200), color, "TAP TO START"s);
+    drawCenteredText(glm::vec2(0, 200), GeneratedGreen, "TAP TO START"s);
 }
 
 void Demo::renderScore() const
