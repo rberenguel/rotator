@@ -32,7 +32,12 @@ int Columns = 2;
 
 namespace
 {
-// constexpr const auto ShapeCount = 6;
+
+EM_JS(void, jsEventPusher, (const char *eventNameCStr), {
+    const eventName = UTF8ToString(eventNameCStr);
+    events.push(eventName);
+    console.log("C++ (EM_JS): Pushed event '" + eventName + "' to JS queue. Queue size: " + events.length);
+});
 
 auto ShapeSegments = 4;
 auto Scale = 1.0;
@@ -357,11 +362,12 @@ void Demo::renderShapes() const
         }();
 
         auto r = glm::mat4_cast(rotation) * shape->wobble.rotation();
-        if(m_state == State::Success || m_state == State::Result){
-            if(shape->selected){
+        if (m_state == State::Success || m_state == State::Result)
+        {
+            if (shape->selected)
+            {
                 r = glm::mat4_cast(rotation);
             }
-            
         }
         glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(Scale)); // Last factor for scale
         const auto model = scaleMatrix * r * t;
@@ -395,11 +401,12 @@ void Demo::renderShapes() const
             {
             case State::Result: {
                 auto alpha = std::max(.7f, m_stateTime / FadeOutTime);
-                if (i == m_firstShape || i == m_secondShape){
+                if (i == m_firstShape || i == m_secondShape)
+                {
                     alpha *= 0.5f;
                     m_shapes[i]->selected = true;
                 }
-                    
+
                 return alpha;
             }
             case State::Success: {
@@ -850,10 +857,12 @@ void Demo::toggleShapeSelection(int index)
             {
                 ++m_score;
                 setState(State::Success);
+                jsEventPusher("success");
             }
             else
             {
                 setState(State::Fail);
+                jsEventPusher("fail");
             }
         }
     }

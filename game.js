@@ -1176,6 +1176,9 @@ function dbg(...args) {
 // end include: runtime_debug.js
 // === Body ===
 
+function jsEventPusher(eventNameCStr) { const eventName = UTF8ToString(eventNameCStr); events.push(eventName); console.log("C++ (EM_JS): Pushed event '" + eventName + "' to JS queue. Queue size: " + events.length); }
+
+
 // end include: preamble.js
 
   /** @constructor */
@@ -8607,6 +8610,8 @@ var wasmImports = {
   /** @export */
   glewInit: _glewInit,
   /** @export */
+  jsEventPusher: jsEventPusher,
+  /** @export */
   strftime_l: _strftime_l
 };
 var wasmExports = createWasm();
@@ -8632,7 +8637,8 @@ var dynCall_viijii = Module['dynCall_viijii'] = createExportWrapper('dynCall_vii
 var dynCall_iiiiij = Module['dynCall_iiiiij'] = createExportWrapper('dynCall_iiiiij');
 var dynCall_iiiiijj = Module['dynCall_iiiiijj'] = createExportWrapper('dynCall_iiiiijj');
 var dynCall_iiiiiijj = Module['dynCall_iiiiiijj'] = createExportWrapper('dynCall_iiiiiijj');
-
+var ___start_em_js = Module['___start_em_js'] = 88372;
+var ___stop_em_js = Module['___stop_em_js'] = 88582;
 
 // include: postamble.js
 // === Auto-generated postamble setup entry stuff ===
