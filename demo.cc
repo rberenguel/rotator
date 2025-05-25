@@ -395,8 +395,11 @@ void Demo::renderShapes() const
             {
             case State::Result: {
                 auto alpha = std::max(.7f, m_stateTime / FadeOutTime);
-                if (i == m_firstShape || i == m_secondShape)
+                if (i == m_firstShape || i == m_secondShape){
                     alpha *= 0.5f;
+                    m_shapes[i]->selected = true;
+                }
+                    
                 return alpha;
             }
             case State::Success: {
