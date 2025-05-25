@@ -356,7 +356,13 @@ void Demo::renderShapes() const
             return shape->rotation;
         }();
 
-        const auto r = glm::mat4_cast(rotation) * shape->wobble.rotation();
+        auto r = glm::mat4_cast(rotation) * shape->wobble.rotation();
+        if(m_state == State::Success || m_state == State::Result){
+            if(shape->selected){
+                r = glm::mat4_cast(rotation);
+            }
+            
+        }
         glm::mat4 scaleMatrix = glm::scale(glm::mat4(1.0f), glm::vec3(Scale)); // Last factor for scale
         const auto model = scaleMatrix * r * t;
 
