@@ -302,7 +302,7 @@ void Demo::render() const
     glClearColor(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (m_state != State::Intro)
+    if (m_state != State::Intro && m_state != State::Pause)
         renderShapes();
 
     renderUI();
@@ -432,6 +432,9 @@ void Demo::renderUI() const
     case State::Playing:
         renderTimer();
         break;
+    case State::Pause:
+        renderTimer();
+        break;
     case State::Result:
         renderTimer();
         renderScore();
@@ -449,7 +452,8 @@ void Demo::renderTimer() const
     static const UIPainter::Font FontSmall{FontName, 40};
 
     const auto remaining = std::max(0, static_cast<int>((totalPlayTime() - m_playTime) * 1000));
-    const auto bigText = [remaining] {
+    const auto localState = m_state;
+    const auto bigText = [remaining, localState] {
         std::stringstream ss;
         ss.fill('0');
         ss.width(2);
@@ -458,6 +462,10 @@ void Demo::renderTimer() const
         ss.fill('0');
         ss.width(2);
         ss << (remaining / 1000) % 60;
+        if (localState == State::Pause)
+        {
+            ss << " (paused)";
+        }
         return ss.str();
     }();
     const auto smallText = [remaining] {
@@ -586,6 +594,10 @@ void Demo::drawCenteredText(const glm::vec2 &pos, const glm::vec4 &color, const 
 
 void Demo::update(float elapsed)
 {
+    if (m_state == State::Pause)
+    {
+        return;
+    }
     if (m_state != State::Success)
     {
         for (auto &shape : m_shapes)
@@ -596,6 +608,8 @@ void Demo::update(float elapsed)
     m_stateTime += elapsed;
     switch (m_state)
     {
+    case State::Pause:
+        break;
     case State::Intro:
         break;
     case State::Success:
@@ -765,6 +779,13 @@ void Demo::handleMouseButton(int x, int y)
         setState(State::Playing);
         break;
     case State::Playing: {
+        if (y < 30)
+        {
+            setState(State::Pause);
+            glClearColor(BackgroundColor.r, BackgroundColor.g, BackgroundColor.b, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            break;
+        }
         const auto shapeIndex = [this, x, y = m_canvasHeight - y] {
             const auto viewportWidth = m_canvasWidth / GlobalGameParams::Columns;
             const auto viewportHeight = (m_canvasHeight - TopMargin) /
@@ -783,6 +804,10 @@ void Demo::handleMouseButton(int x, int y)
             initialize();
         }
         break;
+    }
+    case State::Pause: {
+        setState(State::Playing); // This could put the system in a wrong state in an edge case (when pausing and not
+                                  // playing)
     }
     default:
         break;

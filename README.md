@@ -12,6 +12,7 @@ Changes in this fork:
 - Levelling up by adding more segments (from the base 4 to 7) and down automatically
 - Increase wobbliness to make it easier to see the whole of the shape… and also more confusing to solve
 - Randomised color for each shape to make it more confusing to solve
+- Pausing (tap/click the clock or anywhere on that row)
 
 ## Emscripten steps
 

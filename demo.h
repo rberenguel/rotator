@@ -52,6 +52,7 @@ private:
         Success,
         Fail,
         Result,
+        Pause,
     };
 
     void initialize();
