@@ -405,6 +405,8 @@ void Demo::renderShapes() const
                 {
                     alpha *= 0.5f;
                     m_shapes[i]->selected = true;
+                } else {
+                   m_shapes[i]->selected = false; // Unselect wrong matches 
                 }
 
                 return alpha;
