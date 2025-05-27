@@ -22,7 +22,7 @@ private:
             : amplitude(amplitude)
             , dir(glm::ballRand(1.0f))
             , phase(glm::linearRand(0.0f, 2.0f * glm::pi<float>()))
-            , speed(glm::linearRand(1.0f, 3.0f))
+            , speed(glm::linearRand(2.0f, 5.0f))
         {
         }
         glm::mat4 eval(float t) const

@@ -25,7 +25,7 @@ struct Shape
     glm::imat4x4 baseRotation;
     glm::quat rotation;
     bool selected = false;
-    Wobble wobble = Wobble{0.6f};
+    Wobble wobble = Wobble{0.7f};
     glm::vec4 baseColor;
 };
 
