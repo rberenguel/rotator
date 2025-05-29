@@ -5,7 +5,7 @@
 Wobble::Wobble(float amplitude)
 {
     std::generate_n(std::back_inserter(m_waves), 3,
-                    [amplitude] { return Wave(glm::linearRand(0.5f * amplitude, amplitude)); });
+                    [amplitude] { return Wave(0.5f+glm::linearRand(0.5f * amplitude, amplitude)); });
 }
 
 void Wobble::update(float elapsed)
