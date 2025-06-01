@@ -45,8 +45,8 @@ auto LevelChange = false;
 
 // constexpr const auto TotalPlayTime = 120.0f; // Seconds
 
-constexpr const auto LevelUpScore = 10;
-constexpr const auto LevelDownScore = 5;
+constexpr const auto LevelUpScore = 5;
+constexpr const auto LevelDownScore = 3;
 
 constexpr const auto TopMargin = 0;
 
@@ -82,9 +82,9 @@ constexpr const std::array<glm::vec4, 12> GeneratedColors = {
 constexpr const auto GeneratedGreen = GeneratedColors[1];
 constexpr const auto GeneratedCyan = GeneratedColors[5];
 
-constexpr const auto FadeOutTime = 2.0f;
-constexpr const auto SuccessStateTime = 2.0f;
-constexpr const auto FailStateTime = 1.0f;
+constexpr const auto FadeOutTime = 1.0f;
+constexpr const auto SuccessStateTime = 1.0f;
+constexpr const auto FailStateTime = 0.5f;
 
 constexpr const std::array<glm::imat4x4, 24> Rotations = {
     glm::imat4x4{{0, 0, -1, 0}, {0, -1, 0, 0}, {-1, 0, 0, 0}, {0, 0, 0, 1}},
@@ -116,8 +116,8 @@ constexpr const char *FontName = "monoid-regular.ttf";
 
 float totalPlayTime()
 {
-    // 120s on iPhone (or default), otherwise 240s on wide/hard
-    return GlobalGameParams::ShapeCount * 20.0f;
+    // 60s on iPhone (or default), otherwise 120s on wide/hard
+    return GlobalGameParams::ShapeCount * 10.0f;
 }
 
 Blocks rotated(const Blocks &shape, const glm::imat4x4 &rotation)
