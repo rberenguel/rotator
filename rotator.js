@@ -12,11 +12,27 @@ const urlParams = new URLSearchParams(window.location.search);
 const isWide = urlParams.get("wide") === "true";
 const isThin = urlParams.get("thin") === "true";
 
-const isIPad =
-  /iPad/i.test(navigator.userAgent) ||
-  (navigator.platform === "MacIntel" &&
-    navigator.maxTouchPoints > 1 &&
-    !window.MSStream);
+function getDeviceType() {
+  const ua = navigator.userAgent;
+  const isIPad =
+    /iPad/i.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isIPhone = /iPhone/i.test(ua) && !isIPad;
+
+  if (isIPhone) {
+    return "iPhone";
+  } else if (isIPad) {
+    return "iPad";
+  } else {
+    return "Other";
+  }
+}
+
+const device = getDeviceType();
+
+const isIPad = device === "iPad";
+
+console.log(`Device type ${device}`);
 
 if (isThin) {
   console.log("URL parameter 'thin=true' detected. Forcing thin mode.");
