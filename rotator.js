@@ -61,6 +61,46 @@ if (isThin) {
 }
 // --- End detection logic ---
 
+let hapticLabel = null;
+
+const detectiOS = () => {
+  if (typeof navigator === "undefined") return false;
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+};
+
+function initHaptic() {
+  if (hapticLabel || typeof document === "undefined") return;
+
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.id = "es6-haptic-switch";
+  input.setAttribute("switch", "");
+  input.style.display = "none";
+  document.body.appendChild(input);
+
+  const label = document.createElement("label");
+  label.htmlFor = "es6-haptic-switch";
+  label.style.display = "none";
+  document.body.appendChild(label);
+
+  hapticLabel = label;
+}
+
+function triggerHaptic(duration = 100) {
+  if (!hapticLabel) {
+    console.warn("Haptic feedback not initialized. Call initHaptic() first.");
+    return;
+  }
+
+  if (detectiOS()) {
+    hapticLabel.click();
+  } else if (navigator?.vibrate) {
+    navigator.vibrate(duration);
+  } else {
+    hapticLabel.click(); // Fallback
+  }
+}
+
 console.log(
   "Initial arguments for Module: width=" +
     desiredWidth +
@@ -81,6 +121,8 @@ initialArguments.push("--columns", String(desiredColumns));
 // It's also good to set it on Module.arguments for some versions/configs.
 var arguments_ = initialArguments;
 
+initHaptic();
+
 var Module = {
   canvas: (function () {
     return document.getElementById("canvas");
@@ -97,7 +139,16 @@ var Module = {
   ],
   onRuntimeInitialized: function () {
     console.log("WASM Runtime Initialized (main has been called).");
-    processGameEvents();
+    //processGameEvents();
+    document.getElementById("canvas").addEventListener("touchend", () => {
+      console.log("click");
+      console.log(JSON.stringify(events));
+      const eventName = events.shift();
+      if (eventName === "select") {
+        console.log("triggering");
+        triggerHaptic();
+      }
+    });
   },
 };
 // TODO: add sounds now that I have event passing from the C++ side
@@ -111,14 +162,22 @@ function handleGameEvent(eventName) {
     if (typeof window.triggerFailSound === "function") {
       window.triggerFailSound();
     }
+  } else if (eventName === "select") {
+    triggerHaptic();
   }
   // Add more event types as needed
 }
 
+// Leaving the full event handler just in case, but it does not interact well with having to force select
+/*
 function processGameEvents() {
   while (events.length > 0) {
     const eventName = events.shift(); // Get the oldest event
+    if(eventName === "select"){
+      continue
+    }
     handleGameEvent(eventName);
   }
   requestAnimationFrame(processGameEvents); // Loop continuously
 }
+*/

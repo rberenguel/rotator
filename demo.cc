@@ -843,6 +843,7 @@ void Demo::toggleShapeSelection(int index)
     if (index >= m_shapes.size())
         return;
     auto &shape = m_shapes[index];
+    jsEventPusher("select");
     if (shape->selected)
     {
         shape->selected = false;
@@ -859,12 +860,12 @@ void Demo::toggleShapeSelection(int index)
             {
                 ++m_score;
                 setState(State::Success);
-                jsEventPusher("success");
+                //jsEventPusher("success");
             }
             else
             {
                 setState(State::Fail);
-                jsEventPusher("fail");
+                //jsEventPusher("fail");
             }
         }
     }
