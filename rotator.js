@@ -6,21 +6,11 @@ var programName = "./game.html"; // Or derive from window.location.pathname
 initialArguments.push(programName); // argv[0]
 
 // --- Perform detection logic immediately ---
-let desiredWidth = 550;
-let desiredHeight = 900;
-let desiredShapes = 6;
-let desiredColumns = 2;
+let desiredWidth, desiredHeight, desiredShapes, desiredColumns;
 
 const urlParams = new URLSearchParams(window.location.search);
-const isWideMode = urlParams.get("wide") === "true";
-
-if (isWideMode) {
-  console.log("URL parameter 'wide=true' detected.");
-  desiredWidth = 1200;
-  desiredHeight = 600;
-  desiredShapes = 12;
-  desiredColumns = 4;
-}
+const isWide = urlParams.get("wide") === "true";
+const isThin = urlParams.get("thin") === "true";
 
 const isIPad =
   /iPad/i.test(navigator.userAgent) ||
@@ -28,16 +18,30 @@ const isIPad =
     navigator.maxTouchPoints > 1 &&
     !window.MSStream);
 
-if (isIPad && !isWideMode) {
-  console.log("iPad detected.");
+if (isThin) {
+  console.log("URL parameter 'thin=true' detected. Forcing thin mode.");
+  desiredWidth = 550;
+  desiredHeight = 900;
+  desiredShapes = 6;
+  desiredColumns = 2;
+} else if (isWide) {
+  console.log("URL parameter 'wide=true' detected. Forcing wide mode.");
+  desiredWidth = 1200;
+  desiredHeight = 600;
+  desiredShapes = 12;
+  desiredColumns = 4;
+} else if (isIPad) {
+  console.log("iPad detected. Using wide mode.");
   desiredWidth = 1024;
   desiredHeight = 768;
   desiredShapes = 12;
   desiredColumns = 4;
-} else if (isIPad && isWideMode) {
-  console.log(
-    "iPad detected AND 'wide=true' URL param. 'wide' settings already applied.",
-  );
+} else {
+  console.log("Defaulting to thin mode.");
+  desiredWidth = 550;
+  desiredHeight = 900;
+  desiredShapes = 6;
+  desiredColumns = 2;
 }
 // --- End detection logic ---
 
